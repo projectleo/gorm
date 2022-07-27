@@ -2,6 +2,7 @@ package gorm
 
 import (
 	"bytes"
+	"context"
 	"database/sql"
 	"database/sql/driver"
 	"errors"
@@ -64,6 +65,10 @@ func (scope *Scope) SQLDB() SQLCommon {
 // Dialect get dialect
 func (scope *Scope) Dialect() Dialect {
 	return scope.db.dialect
+}
+
+func (scope *Scope) Context() context.Context {
+	return scope.db.ctx
 }
 
 // Quote used to quote string to escape them for database
@@ -361,7 +366,7 @@ func (scope *Scope) Exec() *Scope {
 	defer scope.trace(NowFunc())
 
 	if !scope.HasError() {
-		if result, err := scope.SQLDB().Exec(scope.SQL, scope.SQLVars...); scope.Err(err) == nil {
+		if result, err := scope.SQLDB().ExecContext(scope.Context(), scope.SQL, scope.SQLVars...); scope.Err(err) == nil {
 			if count, err := result.RowsAffected(); scope.Err(err) == nil {
 				scope.db.RowsAffected = count
 			}
@@ -1136,7 +1141,7 @@ func (scope *Scope) createJoinTable(field *StructField) {
 	if relationship := field.Relationship; relationship != nil && relationship.JoinTableHandler != nil {
 		joinTableHandler := relationship.JoinTableHandler
 		joinTable := joinTableHandler.Table(scope.db)
-		if !scope.Dialect().HasTable(joinTable) {
+		if !scope.Dialect().HasTable(scope.Context(), joinTable) {
 			toScope := &Scope{Value: reflect.New(field.Struct.Type).Interface()}
 
 			var sqlTypes, primaryKeys []string
@@ -1209,7 +1214,7 @@ func (scope *Scope) dropTable() *Scope {
 }
 
 func (scope *Scope) modifyColumn(column string, typ string) {
-	scope.db.AddError(scope.Dialect().ModifyColumn(scope.QuotedTableName(), scope.Quote(column), typ))
+	scope.db.AddError(scope.Dialect().ModifyColumn(scope.Context(), scope.QuotedTableName(), scope.Quote(column), typ))
 }
 
 func (scope *Scope) dropColumn(column string) {
@@ -1217,7 +1222,7 @@ func (scope *Scope) dropColumn(column string) {
 }
 
 func (scope *Scope) addIndex(unique bool, indexName string, column ...string) {
-	if scope.Dialect().HasIndex(scope.TableName(), indexName) {
+	if scope.Dialect().HasIndex(scope.Context(), scope.TableName(), indexName) {
 		return
 	}
 
@@ -1238,7 +1243,7 @@ func (scope *Scope) addForeignKey(field string, dest string, onDelete string, on
 	// Compatible with old generated key
 	keyName := scope.Dialect().BuildKeyName(scope.TableName(), field, dest, "foreign")
 
-	if scope.Dialect().HasForeignKey(scope.TableName(), keyName) {
+	if scope.Dialect().HasForeignKey(scope.Context(), scope.TableName(), keyName) {
 		return
 	}
 	var query = `ALTER TABLE %s ADD CONSTRAINT %s FOREIGN KEY (%s) REFERENCES %s ON DELETE %s ON UPDATE %s;`
@@ -1247,7 +1252,7 @@ func (scope *Scope) addForeignKey(field string, dest string, onDelete string, on
 
 func (scope *Scope) removeForeignKey(field string, dest string) {
 	keyName := scope.Dialect().BuildKeyName(scope.TableName(), field, dest, "foreign")
-	if !scope.Dialect().HasForeignKey(scope.TableName(), keyName) {
+	if !scope.Dialect().HasForeignKey(scope.Context(), scope.TableName(), keyName) {
 		return
 	}
 	var mysql mysql
@@ -1262,18 +1267,18 @@ func (scope *Scope) removeForeignKey(field string, dest string) {
 }
 
 func (scope *Scope) removeIndex(indexName string) {
-	scope.Dialect().RemoveIndex(scope.TableName(), indexName)
+	scope.Dialect().RemoveIndex(scope.Context(), scope.TableName(), indexName)
 }
 
 func (scope *Scope) autoMigrate() *Scope {
 	tableName := scope.TableName()
 	quotedTableName := scope.QuotedTableName()
 
-	if !scope.Dialect().HasTable(tableName) {
+	if !scope.Dialect().HasTable(scope.Context(), tableName) {
 		scope.createTable()
 	} else {
 		for _, field := range scope.GetModelStruct().StructFields {
-			if !scope.Dialect().HasColumn(tableName, field.DBName) {
+			if !scope.Dialect().HasColumn(scope.Context(), tableName, field.DBName) {
 				if field.IsNormal {
 					sqlTag := scope.Dialect().DataTypeOf(field)
 					scope.Raw(fmt.Sprintf("ALTER TABLE %v ADD %v %v;", quotedTableName, scope.Quote(field.DBName), sqlTag)).Exec()
