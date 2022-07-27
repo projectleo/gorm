@@ -5,7 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="133e9b6c-7036-4e35-9b2f-5f73985b2082" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/association_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/association_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dialects/mssql/mssql.go" beforeDir="false" afterPath="$PROJECT_DIR$/dialects/mssql/mssql.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/main_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/naming_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/naming_test.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -25,12 +29,12 @@
               <option name="branches">
                 <list>
                   <RecentBranch>
-                    <option name="branchName" value="support-contexts" />
-                    <option name="lastUsedInstant" value="1658916092" />
+                    <option name="branchName" value="master" />
+                    <option name="lastUsedInstant" value="1658918512" />
                   </RecentBranch>
                   <RecentBranch>
-                    <option name="branchName" value="master" />
-                    <option name="lastUsedInstant" value="1658916091" />
+                    <option name="branchName" value="support-contexts" />
+                    <option name="lastUsedInstant" value="1658916092" />
                   </RecentBranch>
                 </list>
               </option>

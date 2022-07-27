@@ -3,11 +3,10 @@ package gorm_test
 import (
 	"fmt"
 	"reflect"
-
-	"github.com/jinzhu/gorm"
-
 	"testing"
 	"time"
+
+	"github.com/projectleo/gorm"
 )
 
 func TestFirstAndLast(t *testing.T) {
